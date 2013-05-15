@@ -21,6 +21,7 @@ class Camera {
 
     int width, height, fps, skip_frames, frames_to_skip;
     std::string device, frame;
+    int brightness, contrast, wbt, wbtauto, plf, gain, sharpness, backlight, focusauto, focus, saturation, pan, tilt, expabs, expauto, expautop;
     bool rotate;
 
     camera_info_manager::CameraInfoManager info_mgr;

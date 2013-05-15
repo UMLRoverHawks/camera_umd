@@ -24,10 +24,11 @@ std::runtime_error up(std::string message)
 	return std::runtime_error(awwcrap.str().c_str());
 }
 
-Cam::Cam(const char *_device, mode_t _mode, int _width, int _height, int _fps)
+Cam::Cam(const char *_device, mode_t _mode, int _width, int _height, int _fps, int _brightness, int _contrast, int _wbt, int _wbtauto, int _plf, int _gain, int _sharpness, int _backlight, int _focusauto, int _focus, int _saturation, int _pan, int _tilt, int _expabs, int _expauto, int _expautop)
 : mode(_mode), device(_device),
   motion_threshold_luminance(100), motion_threshold_count(-1),
-  width(_width), height(_height), fps(_fps), rgb_frame(NULL)
+  width(_width), height(_height), fps(_fps), rgb_frame(NULL),
+  brightness(_brightness), contrast(_contrast), wbt(_wbt), wbtauto(_wbtauto), plf(_plf), gain(_gain), sharpness(_sharpness), backlight(_backlight), focusauto(_focusauto), focus(_focus), saturation(_saturation), pan(_pan), tilt(_tilt), expabs(_expabs), expauto(_expauto), expautop(_expautop)
 {
   printf("opening %s\n", _device);
   if ((fd = open(_device, O_RDWR)) == -1)
@@ -167,8 +168,7 @@ Cam::Cam(const char *_device, mode_t _mode, int _width, int _height, int _fps)
 
   try
   {
-    // the commented labels correspond to the controls in guvcview and uvcdynctrl
-
+    // the commented labels correspond to controls not available for this camera
     //set_control(V4L2_CID_EXPOSURE_AUTO_NEW, 2);
     set_control(10094851, 1); // Exposure, Auto Priority
     set_control(10094849, 1); // Exposure, Auto
@@ -178,23 +178,28 @@ Cam::Cam(const char *_device, mode_t _mode, int _width, int _height, int _fps)
     //set_control(V4L2_CID_BRIGHTNESS, 140);
     //set_control(V4L2_CID_CONTRAST, 40);
     //set_control(V4L2_CID_WHITE_BALANCE_TEMP_AUTO_OLD, 0);
-    set_control(9963776, 128); //Brightness
-    set_control(9963777, 32); //Contrast
-    set_control(9963788, 1); // White Balance Temperature, Auto
-    set_control(9963802, 5984); // White Balance Temperature
-    set_control(9963800, 2);  // power line frequency to 60 hz
-    set_control(9963795, 200); // Gain
-    set_control(9963803, 224); // Sharpness
-    set_control(9963804, 1); //Backlight Compensation
-    set_control(10094850, 250); // Exposure (Absolute)
-    set_control(168062212, 16); //Focus (absolute)
-    set_control(168062213, 3); //LED1 Mode
-    set_control(168062214, 0); //LED1 Frequency
-    set_control(9963778, 32); // Saturation
+    set_control(9963776, brightness); //Brightness
+    set_control(9963777, contrast); //Contrast
+    set_control(9963788, wbtauto); // White Balance Temperature, Auto
+    if(wbtauto == 0)    
+	set_control(9963802, wbt); // White Balance Temperature THIS ONLY WORKS IF WBT, Auto is set to 0
+    set_control(9963800, plf);  // power line frequency to 60 hz
+    set_control(9963795, gain); // Gain
+    set_control(9963803, sharpness); // Sharpness
+    set_control(9963804, backlight); //Backlight Compensation
+    set_control(10094850, expabs); // Exposure (Absolute)
+    set_control(10094860, focusauto);//Focus, Auto
+    if(focusauto == 0)
+    	set_control(10094858, focus); //Focus (absolute) THIS ONLY WORKS IF Focus, Auto is set to 0
+    //set_control(168062213, 3); //LED1 Mode
+    //set_control(168062214, 0); //LED1 Frequency
+    set_control(9963778, saturation); // Saturation
+    set_control(10094856, pan);//Pan (Absolute)
+    set_control(10094857, tilt);//Tilt (Absolute)
   }
   catch (std::runtime_error &ex)
   {
-    ROS_ERROR("could not set some settings. %s", ex.what());
+    printf("ERROR: could not set some settings.  \n %s \n", ex.what());
   }
 
 /*

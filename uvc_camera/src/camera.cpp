@@ -22,7 +22,7 @@ namespace uvc_camera
           info_mgr(_comm_nh, "camera"), cam(0)
   {
 
-    /* default config values */
+    /* default config values, can be changed, most are self explanatory */
     width = 640;
     height = 480;
     fps = 10;
@@ -31,6 +31,22 @@ namespace uvc_camera
     device = "/dev/video0";
     frame = "camera";
     rotate = false;
+    brightness = 128;
+    contrast = 32;
+    wbt = 5984; //will be ignored unless next value is 0 (white balance temp)
+    wbtauto = 1;
+    plf = 2;
+    gain = 200;
+    sharpness = 224;
+    backlight = 1;
+    focusauto = 1;
+    focus = 16; //will be ignored unless prev value is 0
+    saturation = 32;
+    pan = 0;
+    tilt = 0;
+    expabs = 250;
+    expauto = 1;
+    expautop = 1;
 
     /* set up information manager */
     std::string url;
@@ -49,6 +65,23 @@ namespace uvc_camera
     pnode.getParam("height", height);
 
     pnode.getParam("frame_id", frame);
+
+    pnode.getParam("brightness", brightness);
+    pnode.getParam("contrast", contrast);
+    pnode.getParam("wbt", wbt);
+    pnode.getParam("wbtauto", wbtauto);
+    pnode.getParam("plf", plf);
+    pnode.getParam("gain", gain);
+    pnode.getParam("sharpness", sharpness);
+    pnode.getParam("backlight", backlight);
+    pnode.getParam("focusauto", focusauto);
+    pnode.getParam("focus", focus);
+    pnode.getParam("saturation", saturation);
+    pnode.getParam("pan", pan);
+    pnode.getParam("tilt", tilt);
+    pnode.getParam("expabs", expabs);
+    pnode.getParam("expauto", expauto);
+    pnode.getParam("expautop", expautop);
 
     std::string modestr;
     uvc_cam::Cam::mode_t mode;
@@ -74,17 +107,21 @@ namespace uvc_camera
     }
 
     std::string output_topic;
-    pnode.param("output_topic", output_topic, std::string("image_raw"));
+    std::string info_topic;
 
+    pnode.getParam("info_topic", info_topic);
+    pnode.getParam("output_topic", output_topic);
+ //   pnode.param("output_topic", output_topic, std::string("image_raw"));
+ //   pnode.param("info_topic", info_topic, std::string("image_raw"));
     /* advertise image streams and info streams */
     pub = it.advertise(output_topic.c_str(), 1);
 
-    info_pub = node.advertise<CameraInfo>("camera_info", 1);
+    info_pub = node.advertise<CameraInfo>(info_topic.c_str(), 1);
 
     /* initialize the cameras */
     try
     {
-      cam = new uvc_cam::Cam(device.c_str(), mode, width, height, fps);
+      cam = new uvc_cam::Cam(device.c_str(), mode, width, height, fps, brightness, contrast, wbt, wbtauto, plf, gain, sharpness, backlight, focusauto, focus, saturation, pan, tilt, expabs, expauto, expautop);
       cam->set_motion_thresholds(100, -1);
     }
     catch (std::exception &e)
