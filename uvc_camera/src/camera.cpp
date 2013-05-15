@@ -87,23 +87,15 @@ namespace uvc_camera
     uvc_cam::Cam::mode_t mode;
     pnode.param("mode", modestr, std::string("MJPG"));
     if (modestr.find("MJPG"))
-    {
       mode = uvc_cam::Cam::MODE_MJPG;
-    }
     else if (modestr.find("RGB"))
-    {
       mode = uvc_cam::Cam::MODE_RGB;
-    }
     else if (modestr.find("YUYV"))
-    {
       mode = uvc_cam::Cam::MODE_YUYV;
-    }
     else
     {
-      ROS_ERROR("Unsupported mode specified");
-      node.shutdown();
-      pnode.shutdown();
-      return;
+      ROS_ERROR("%s is an unsupported mode! Using MJPG", modestr.c_str());
+      mode = uvc_cam::Cam::MODE_MJPG;
     }
 
     std::string output_topic;
