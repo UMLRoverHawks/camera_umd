@@ -35,7 +35,7 @@ namespace uvc_camera
     contrast = 32;
     wbt = 5984; //will be ignored unless next value is 0 (white balance temp)
     wbtauto = 1;
-    plf = 2;
+    plf = 2; //power line frequency
     gain = 200;
     sharpness = 224;
     backlight = 1;
@@ -109,8 +109,22 @@ namespace uvc_camera
     pub = it.advertise(output_topic.c_str(), 1);
 
     info_pub = node.advertise<CameraInfo>(info_topic.c_str(), 1);
-
-    /* initialize the cameras */
+    brightness_sub = node.subscribe("brightness", 1000, &Camera::brightnessCallback, this);
+    contrast_sub = node.subscribe("contrast", 1000, &Camera::contrastCallback, this);
+    exposure_sub = node.subscribe("exposure", 1000, &Camera::exposureCallback, this);
+    exposureauto_sub = node.subscribe("exposureauto", 1000, &Camera::exposureautoCallback, this);
+    exposureautoprio_sub = node.subscribe("exposureautoprio", 1000, &Camera::exposureautoprioCallback, this);
+    wbtauto_sub = node.subscribe("wbtauto", 1000, &Camera::wbtautoCallback, this);
+    wbt_sub = node.subscribe("wbt", 1000, &Camera::wbtCallback, this);
+    gain_sub = node.subscribe("gain", 1000, &Camera::gainCallback, this);
+    sharpness_sub = node.subscribe("sharpness", 1000, &Camera::sharpnessCallback, this);
+    saturation_sub = node.subscribe("saturation", 1000, &Camera::saturationCallback, this);
+    focusauto_sub = node.subscribe("focusauto", 1000, &Camera::focusautoCallback, this);
+    focus_sub = node.subscribe("focus", 1000, &Camera::focusCallback, this);
+    backlight_sub = node.subscribe("backlight", 1000, &Camera::backlightCallback, this);
+    pan_sub = node.subscribe("pan", 1000, &Camera::panCallback, this);
+    tilt_sub = node.subscribe("tilt", 1000, &Camera::tiltCallback, this);
+/* initialize the cameras */
     try
     {
       cam = new uvc_cam::Cam(device.c_str(), mode, width, height, fps, brightness, contrast, wbt, wbtauto, plf, gain, sharpness, backlight, focusauto, focus, saturation, pan, tilt, expabs, expauto, expautop);
@@ -217,7 +231,131 @@ namespace uvc_camera
     if (cam)
       delete cam;
   }
+  
+  void Camera::brightnessCallback(const std_msgs::Int32::ConstPtr& msg)
+  {
+      if(msg->data >= 0 && msg->data <=255)
+      {
+        ROS_INFO("Setting Brightness to: [%d]", msg->data);
+        cam->set_control(9963776,msg->data);
+      }
+  }
 
+  void Camera::contrastCallback(const std_msgs::Int32::ConstPtr& msg)
+  {
+    if(msg->data >= 0 && msg->data <=255)
+      {
+        ROS_INFO("Setting Contrast to: [%d]", msg->data);
+        cam->set_control(9963777,msg->data);
+      }
+  }
+  
+    void Camera::exposureCallback(const std_msgs::Int32::ConstPtr& msg)
+  {
+    if(msg->data >= 3 && msg->data <=2047)
+      {
+        ROS_INFO("Setting Exposure(Absolute) to: [%d]", msg->data);
+	cam->set_control(10094850,msg->data);
+      }
+  }
+  
+      void Camera::exposureautoCallback(const std_msgs::Int32::ConstPtr& msg)
+  {
+    if(msg->data == 1 || msg->data ==3)
+      {
+        ROS_INFO("Setting Exposure(Auto) to: [%d]", msg->data);
+	cam->set_control(10094849,msg->data);
+      }
+  }
+  
+      void Camera::exposureautoprioCallback(const std_msgs::Int32::ConstPtr& msg)
+  {
+    if(msg->data >= 0 && msg->data <=1)
+      {
+        ROS_INFO("Setting Exposure Auto Priority to: [%d]", msg->data);
+	cam->set_control(10094851,msg->data);
+      }
+  }
+  
+   void Camera::backlightCallback(const std_msgs::Int32::ConstPtr& msg)
+  {
+    if(msg->data >= 0 && msg->data <=1)
+      {
+         ROS_INFO("Setting Backlight compensation to: [%d]", msg->data);
+	cam->set_control(9963804,msg->data);
+      }
+  }
+  
+    void Camera::wbtautoCallback(const std_msgs::Int32::ConstPtr& msg)
+  {
+    if(msg->data >= 0 && msg->data <=1)
+      {
+        ROS_INFO("Setting WBT (Auto) to: [%d]", msg->data);
+        cam->set_control(9963788,msg->data);
+      }
+  }
+  
+    void Camera::wbtCallback(const std_msgs::Int32::ConstPtr& msg)
+  {
+    if(msg->data >= 2800 && msg->data <=6500)
+      {
+        ROS_INFO("Setting WBT(Absolute) to: [%d]", msg->data);
+	cam->set_control(9963802,msg->data);
+      }
+  }
+    void Camera::gainCallback(const std_msgs::Int32::ConstPtr& msg)
+  {
+    if(msg->data >= 0 && msg->data <=255)
+      {
+        ROS_INFO("Setting gain to: [%d]", msg->data);
+	cam->set_control(9963795,msg->data);
+      }
+  }
+    void Camera::sharpnessCallback(const std_msgs::Int32::ConstPtr& msg)
+  {
+    if(msg->data >= 0 && msg->data <=255)
+      {
+        ROS_INFO("Setting sharpness to: [%d]", msg->data);
+	cam->set_control(9963803,msg->data);
+      }
+  }
+    void Camera::saturationCallback(const std_msgs::Int32::ConstPtr& msg)
+  {
+    if(msg->data >= 0 && msg->data <=255)
+      {
+        ROS_INFO("Setting saturation to: [%d]", msg->data);
+        cam->set_control(9963778,msg->data);
+      }
+  }
+      void Camera::focusautoCallback(const std_msgs::Int32::ConstPtr& msg)
+  {
+    if(msg->data >= 0 && msg->data <=1)
+      {
+        ROS_INFO("Setting focusauto to: [%d]", msg->data);
+	cam->set_control(10094860,msg->data);
+      }
+  }
+  void Camera::focusCallback(const std_msgs::Int32::ConstPtr& msg)
+  {
+    if(msg->data >= 0 && msg->data <=255)
+      {
+         cam->set_control(10094858,msg->data);
+      }
+   } 
+  void Camera::tiltCallback(const std_msgs::Int32::ConstPtr& msg)
+  {
+    if(msg->data >= -36000 && msg->data <=36000)
+      {
+         cam->set_control(10094857,msg->data);
+      }
+  }  
+  void Camera::panCallback(const std_msgs::Int32::ConstPtr& msg)
+  {
+    if(msg->data >=-36000 && msg->data <=36000)
+      {
+         cam->set_control(10094856,msg->data);
+      }
+   }
 }
 ;
 
