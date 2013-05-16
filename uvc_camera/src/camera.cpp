@@ -23,29 +23,29 @@ namespace uvc_camera
   {
 
     /* default config values, can be changed, most are self explanatory */
-    width = 640;
-    height = 480;
-    fps = 10;
+    width = 1184;
+    height = 656;
+    fps = 30;
     skip_frames = 0;
     frames_to_skip = 0;
     device = "/dev/video0";
     frame = "camera";
     rotate = false;
     brightness = 128;
-    contrast = 32;
-    wbt = 5984; //will be ignored unless next value is 0 (white balance temp)
+    contrast = 33;
+    wbt = 5315; //will be ignored unless next value is 0 (white balance temp)
     wbtauto = 1;
     plf = 2; //power line frequency
-    gain = 200;
-    sharpness = 224;
-    backlight = 1;
+    gain = 64;
+    sharpness = 72;
+    backlight = 0;
     focusauto = 1;
     focus = 16; //will be ignored unless prev value is 0
     saturation = 32;
     pan = 0;
     tilt = 0;
-    expabs = 250;
-    expauto = 1;
+    expabs = 166;
+    expauto = 3;
     expautop = 1;
 
     /* set up information manager */
