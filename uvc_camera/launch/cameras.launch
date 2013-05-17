@@ -14,7 +14,7 @@
     <arg name="device" default="/dev/video3" />    
   </include>
   
-  <group if="$(republishtheora)" >
+  <group if="$(arg republishtheora)" >
     <include file="$(find republish_theora)/launch/republish.launch" ns="camera0" />
     <include file="$(find republish_theora)/launch/republish.launch" ns="camera1" />
     <include file="$(find republish_theora)/launch/republish.launch" ns="camera2" />
