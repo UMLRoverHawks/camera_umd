@@ -107,8 +107,9 @@ namespace uvc_camera
  //   pnode.param("info_topic", info_topic, std::string("image_raw"));
     /* advertise image streams and info streams */
     pub = it.advertise(output_topic.c_str(), 1);
-
     info_pub = node.advertise<CameraInfo>(info_topic.c_str(), 1);
+
+    // parameters settings subscribers
     brightness_sub = node.subscribe("brightness", 1000, &Camera::brightnessCallback, this);
     contrast_sub = node.subscribe("contrast", 1000, &Camera::contrastCallback, this);
     exposure_sub = node.subscribe("exposure", 1000, &Camera::exposureCallback, this);
@@ -124,6 +125,13 @@ namespace uvc_camera
     backlight_sub = node.subscribe("backlight", 1000, &Camera::backlightCallback, this);
     pan_sub = node.subscribe("pan", 1000, &Camera::panCallback, this);
     tilt_sub = node.subscribe("tilt", 1000, &Camera::tiltCallback, this);
+   
+    // publish camera parameter info 
+    brightness_pub = node.advertise<std_msgs::Int32>("brightness_info", 1); // for UI
+    contrast_pub = node.advertise<std_msgs::Int32>("contrast_info", 1); // for UI
+    exposure_pub = node.advertise<std_msgs::Int32>("exposure_info", 1); // for UI
+    wbt_pub = node.advertise<std_msgs::Int32>("wbt_info", 1); // for UI
+
 /* initialize the cameras */
     try
     {
@@ -169,6 +177,21 @@ namespace uvc_camera
   }
 
   void
+  Camera::sendParameterInfo()
+  {
+    // the following parameters use std_msgs::Int32
+    std_msgs::Int32 msg; 
+    msg.data = brightness; 
+    brightness_pub.publish( msg );
+    msg.data = contrast;
+    contrast_pub.publish( msg );
+    msg.data = expabs;  
+    exposure_pub.publish( msg );
+    msg.data = wbt;
+    wbt_pub.publish( msg );
+  }
+
+  void
   Camera::feedImages()
   {
     unsigned int pair_id = 0;
@@ -205,9 +228,12 @@ namespace uvc_camera
 
           memcpy(&image->data[0], img_frame, width * height * 3);
 
+	  // publish image
           pub.publish(image);
-
+	  // send camera info
           sendInfo(image, capture_time);
+	  // publish camera parameter info
+	  sendParameterInfo();
 
           ++pair_id;
         }
@@ -238,6 +264,7 @@ namespace uvc_camera
       {
         ROS_INFO("Setting Brightness to: [%d]", msg->data);
         cam->set_control(9963776,msg->data);
+	brightness = msg->data;
       }
   }
 
@@ -247,6 +274,7 @@ namespace uvc_camera
       {
         ROS_INFO("Setting Contrast to: [%d]", msg->data);
         cam->set_control(9963777,msg->data);
+	contrast = msg->data;
       }
   }
   
@@ -256,6 +284,7 @@ namespace uvc_camera
       {
         ROS_INFO("Setting Exposure(Absolute) to: [%d]", msg->data);
 	cam->set_control(10094850,msg->data);
+	expabs = msg->data;
       }
   }
   
@@ -302,6 +331,7 @@ namespace uvc_camera
         ROS_INFO("Setting WBT(Absolute) to: [%d]", msg->data);
 	cam->set_control(9963802,msg->data);
       }
+      wbt = msg->data;
   }
     void Camera::gainCallback(const std_msgs::Int32::ConstPtr& msg)
   {
