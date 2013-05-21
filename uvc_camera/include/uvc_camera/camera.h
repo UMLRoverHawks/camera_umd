@@ -12,6 +12,7 @@ class Camera {
     Camera(ros::NodeHandle comm_nh, ros::NodeHandle param_nh);
     void onInit();
     void sendInfo(sensor_msgs::ImagePtr &image, ros::Time time);
+    void sendParameterInfo();
     void feedImages();
     void brightnessCallback(const std_msgs::Int32::ConstPtr& msg);
     void contrastCallback(const std_msgs::Int32::ConstPtr& msg);
@@ -44,6 +45,7 @@ class Camera {
 
     image_transport::Publisher pub;
     ros::Publisher info_pub;
+    // subscribers for setting parameters
     ros::Subscriber brightness_sub;
     ros::Subscriber contrast_sub;
     ros::Subscriber exposure_sub;
@@ -59,6 +61,11 @@ class Camera {
     ros::Subscriber focus_sub;  
     ros::Subscriber pan_sub;  
     ros::Subscriber tilt_sub;  
+    // publisher of current parameters (in lieu CameraInfo.msg)
+    ros::Publisher brightness_pub; // for ui
+    ros::Publisher contrast_pub; // for ui
+    ros::Publisher exposure_pub; // for ui
+    ros::Publisher wbt_pub; // for ui
     uvc_cam::Cam *cam;
     boost::thread image_thread;
 };
