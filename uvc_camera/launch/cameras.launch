@@ -2,16 +2,16 @@
   <arg name="republishtheora" default="false" />
   
   <include file="$(find uvc_camera)/launch/camera_node.launch" ns="camera0" >
-    <arg name="device" default="/dev/video0" />
+    <arg name="device" default="/dev/camera0" />
   </include>
   <include file="$(find uvc_camera)/launch/camera_node.launch" ns="camera1" >
-    <arg name="device" default="/dev/video1" />
+    <arg name="device" default="/dev/camera1" />
   </include>
   <include file="$(find uvc_camera)/launch/camera_node.launch" ns="camera2" >
-    <arg name="device" default="/dev/video2" />
+    <arg name="device" default="/dev/camera2" />
   </include>
   <include file="$(find uvc_camera)/launch/camera_node.launch" ns="camera3" >
-    <arg name="device" default="/dev/video3" />    
+    <arg name="device" default="/dev/camera3" />    
   </include>
   
   <group if="$(arg republishtheora)" >
