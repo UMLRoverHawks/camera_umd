@@ -18,7 +18,7 @@
   <arg name="gain" default="64" />
   <arg name="sharpness" default="72" />
   <arg name="backlight" default="0" />
-  <arg name="focusauto" default="1" />
+  <arg name="focusauto" default="0" />
   <arg name="focus" default="16" />
   <arg name="saturation" default="32" />
   <arg name="pan" default="0" />
