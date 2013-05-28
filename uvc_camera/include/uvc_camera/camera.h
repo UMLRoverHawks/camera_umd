@@ -66,6 +66,10 @@ class Camera {
     ros::Publisher contrast_pub; // for ui
     ros::Publisher exposure_pub; // for ui
     ros::Publisher wbt_pub; // for ui
+    ros::Publisher gain_pub; // for ui
+    ros::Publisher focus_pub; // for ui
+    ros::Publisher tilt_pub; // for ui
+
     uvc_cam::Cam *cam;
     boost::thread image_thread;
 };

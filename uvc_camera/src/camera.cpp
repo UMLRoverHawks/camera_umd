@@ -127,10 +127,15 @@ namespace uvc_camera
     tilt_sub = node.subscribe("tilt", 1000, &Camera::tiltCallback, this);
    
     // publish camera parameter info 
-    brightness_pub = node.advertise<std_msgs::Int32>("brightness_info", 1); // for UI
-    contrast_pub = node.advertise<std_msgs::Int32>("contrast_info", 1); // for UI
-    exposure_pub = node.advertise<std_msgs::Int32>("exposure_info", 1); // for UI
-    wbt_pub = node.advertise<std_msgs::Int32>("wbt_info", 1); // for UI
+    bool latch = true;
+    brightness_pub = node.advertise<std_msgs::Int32>("brightness_info", 1, latch); // for UI
+    contrast_pub = node.advertise<std_msgs::Int32>("contrast_info", 1, latch); // for UI
+    exposure_pub = node.advertise<std_msgs::Int32>("exposure_info", 1, latch); // for UI
+    wbt_pub = node.advertise<std_msgs::Int32>("wbt_info", 1, latch); // for UI
+    gain_pub = node.advertise<std_msgs::Int32>("gain_info", 1, latch); // for UI
+    focus_pub = node.advertise<std_msgs::Int32>("focus_info", 1, latch); // for UI
+    // tilt
+    tilt_pub = node.advertise<std_msgs::Int32>("tilt_info", 1, latch); // for UI
 
 /* initialize the cameras */
     try
@@ -176,8 +181,9 @@ namespace uvc_camera
     info_pub.publish(info);
   }
 
+/*
   void
-  Camera::sendParameterInfo()
+  Camera::sendParameterInfo( )
   {
     // the following parameters use std_msgs::Int32
     std_msgs::Int32 msg; 
@@ -189,7 +195,11 @@ namespace uvc_camera
     exposure_pub.publish( msg );
     msg.data = wbt;
     wbt_pub.publish( msg );
+    focus_pub.publish( msg );
+    gain_pub.publish( msg );
+    tilt_pub.publish( msg );
   }
+*/
 
   void
   Camera::feedImages()
@@ -233,7 +243,7 @@ namespace uvc_camera
 	  // send camera info
           sendInfo(image, capture_time);
 	  // publish camera parameter info
-	  sendParameterInfo();
+	  //sendParameterInfo();
 
           ++pair_id;
         }
@@ -264,7 +274,9 @@ namespace uvc_camera
       {
         ROS_INFO("Setting Brightness to: [%d]", msg->data);
         cam->set_control(9963776,msg->data);
+	// update setting value and republish (e.g. echo!)
 	brightness = msg->data;
+        brightness_pub.publish( msg );
       }
   }
 
@@ -274,7 +286,9 @@ namespace uvc_camera
       {
         ROS_INFO("Setting Contrast to: [%d]", msg->data);
         cam->set_control(9963777,msg->data);
+ 	// updated value and republish
 	contrast = msg->data;
+        contrast_pub.publish( msg );
       }
   }
   
@@ -284,7 +298,9 @@ namespace uvc_camera
       {
         ROS_INFO("Setting Exposure(Absolute) to: [%d]", msg->data);
 	cam->set_control(10094850,msg->data);
+        // update setting value and republish (e.g. echo!)
 	expabs = msg->data;
+        exposure_pub.publish( msg );
       }
   }
   
@@ -330,8 +346,9 @@ namespace uvc_camera
       {
         ROS_INFO("Setting WBT(Absolute) to: [%d]", msg->data);
 	cam->set_control(9963802,msg->data);
+        wbt = msg->data;
+  	wbt_pub.publish( msg );
       }
-      wbt = msg->data;
   }
     void Camera::gainCallback(const std_msgs::Int32::ConstPtr& msg)
   {
@@ -370,6 +387,8 @@ namespace uvc_camera
     if(msg->data >= 0 && msg->data <=255)
       {
          cam->set_control(10094858,msg->data);
+ 	 focus = msg->data;
+ 	 focus_pub.publish( msg );
       }
    } 
   void Camera::tiltCallback(const std_msgs::Int32::ConstPtr& msg)
@@ -377,6 +396,8 @@ namespace uvc_camera
     if(msg->data >= -36000 && msg->data <=36000)
       {
          cam->set_control(10094857,msg->data);
+ 	 tilt = msg->data;
+ 	 tilt_pub.publish( msg );
       }
   }  
   void Camera::panCallback(const std_msgs::Int32::ConstPtr& msg)
