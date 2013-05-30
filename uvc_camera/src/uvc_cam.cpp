@@ -475,7 +475,8 @@ void Cam::set_control(uint32_t id, int val)
   c.value = val;
   if (ioctl(fd, VIDIOC_S_CTRL, &c) < 0)
   {
-	throw up("unable to set control");
+        ROS_INFO("Control not set!");
+	//throw up("unable to set control");
   }
 }
 
