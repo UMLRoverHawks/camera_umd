@@ -190,21 +190,29 @@ namespace uvc_camera
   Camera::initialParameterPublish()
   {
     // the following parameters use std_msgs::Int32
-    std_msgs::Int32 msg; 
-    msg.data = brightness; 
-    brightness_pub.publish( msg );
-    msg.data = contrast;
-    contrast_pub.publish( msg );
-    msg.data = expabs;  
-    exposure_pub.publish( msg );
-    msg.data = wbt;
-    wbt_pub.publish( msg );
-    msg.data = focus; 
-    focus_pub.publish( msg );
-    msg.data = gain; 
-    gain_pub.publish( msg );
-    msg.data = tilt; 
-    tilt_pub.publish( msg );
+    std_msgs::Int32 msg0; 
+    std_msgs::Int32 msg1; 
+    std_msgs::Int32 msg2; 
+    std_msgs::Int32 msg3; 
+    std_msgs::Int32 msg4; 
+    std_msgs::Int32 msg5; 
+    std_msgs::Int32 msg6; 
+    
+    msg0.data = brightness; 
+    brightness_pub.publish( msg0 );
+    msg1.data = contrast;; 
+    contrast_pub.publish( msg1 );
+    msg2.data = expabs;  
+    exposure_pub.publish( msg2 );
+    msg3.data = wbt;
+    wbt_pub.publish( msg3 );
+    msg4.data = focus; 
+    focus_pub.publish( msg4 );
+    msg5.data = gain; 
+    gain_pub.publish( msg5 );
+    msg6.data = tilt; 
+    tilt_pub.publish( msg6 );
+
   }
 
 
