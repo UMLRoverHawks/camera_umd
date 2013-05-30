@@ -151,6 +151,10 @@ namespace uvc_camera
       return;
     }
 
+    /* do an initial (latch) publish of camera parameters so the are available to 
+	parameter subscribers */
+    initialParameterPublish();
+    
     /* and turn on the streamer */
     ok = true;
     image_thread = boost::thread(boost::bind(&Camera::feedImages, this));
@@ -181,9 +185,9 @@ namespace uvc_camera
     info_pub.publish(info);
   }
 
-/*
+
   void
-  Camera::sendParameterInfo( )
+  Camera::initialParameterPublish()
   {
     // the following parameters use std_msgs::Int32
     std_msgs::Int32 msg; 
@@ -195,11 +199,14 @@ namespace uvc_camera
     exposure_pub.publish( msg );
     msg.data = wbt;
     wbt_pub.publish( msg );
+    msg.data = focus; 
     focus_pub.publish( msg );
+    msg.data = gain; 
     gain_pub.publish( msg );
+    msg.data = tilt; 
     tilt_pub.publish( msg );
   }
-*/
+
 
   void
   Camera::feedImages()
@@ -387,6 +394,7 @@ namespace uvc_camera
     if(msg->data >= 0 && msg->data <=255)
       {
          cam->set_control(10094858,msg->data);
+         ROS_INFO("Setting absolute (primary) exposure to: [%d]", msg->data);
  	 focus = msg->data;
  	 focus_pub.publish( msg );
       }
@@ -396,6 +404,7 @@ namespace uvc_camera
     if(msg->data >= -36000 && msg->data <=36000)
       {
          cam->set_control(10094857,msg->data);
+         ROS_INFO("Setting camera tilt to (3600 increments): [%d]", msg->data);
  	 tilt = msg->data;
  	 tilt_pub.publish( msg );
       }

@@ -12,7 +12,7 @@ class Camera {
     Camera(ros::NodeHandle comm_nh, ros::NodeHandle param_nh);
     void onInit();
     void sendInfo(sensor_msgs::ImagePtr &image, ros::Time time);
-    void sendParameterInfo();
+    void initialParameterPublish();
     void feedImages();
     void brightnessCallback(const std_msgs::Int32::ConstPtr& msg);
     void contrastCallback(const std_msgs::Int32::ConstPtr& msg);
