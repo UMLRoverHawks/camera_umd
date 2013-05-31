@@ -2,3 +2,5 @@
 .project
 .pydevproject
 cmake_install.cmake
+msg_gen
+src/uvc_camera
