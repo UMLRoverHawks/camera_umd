@@ -425,6 +425,7 @@ namespace uvc_camera
 */
   void Camera::tiltCallback(const std_msgs::Int32::ConstPtr& msg)
   {
+    ROS_INFO("Got into the tilt callback!");
     if(msg->data >= -36000 && msg->data <=36000)
       {
          cam->set_control(10094857,msg->data);
