@@ -134,7 +134,6 @@ namespace uvc_camera
     tilt_sub = node.subscribe("tilt", 1000, &Camera::tiltCallback, this);
    
     // publish camera parameter info 
-    bool latch = true;
     /*brightness_pub = node.advertise<std_msgs::Int32>("brightness_info", 1, latch); // for UI
     contrast_pub = node.advertise<std_msgs::Int32>("contrast_info", 1, latch); // for UI
     exposure_pub = node.advertise<std_msgs::Int32>("exposure_info", 1, latch); // for UI
@@ -142,9 +141,9 @@ namespace uvc_camera
     gain_pub = node.advertise<std_msgs::Int32>("gain_info", 1, latch); // for UI
     focus_pub = node.advertise<std_msgs::Int32>("focus_info", 1, latch); // for UI
     */
-    settings_pub = node.advertise<uvc_camera::camera_sliders>("sliders_info", 10, latch);
+    settings_pub = node.advertise<uvc_camera::camera_sliders>("sliders_info", 10, true);
     // tilt
-    tilt_pub = node.advertise<std_msgs::Int32>("tilt_info", 10, latch); // for UI
+    tilt_pub = node.advertise<std_msgs::Int32>("tilt_info", 10, true); // for UI
 
 /* initialize the cameras */
     try
@@ -437,53 +436,63 @@ namespace uvc_camera
 
   void Camera::settingsCallback(const uvc_camera::camera_sliders& msg)
   {
+     bool changed=false;
      if(msg.brightness != brightness && msg.brightness != -1)
      {
 	     cam->set_control(9963776,msg.brightness);
 	     brightness = msg.brightness;
+	     changed=true;
      }
      if(msg.contrast != contrast && msg.brightness != -1)
      {
 	     cam->set_control(9963777,msg.contrast);
 	     contrast = msg.contrast;
+	     changed=true;
      }
      if(msg.exposure != expabs && msg.exposure != -1)
      {
 	     cam->set_control(10094850,msg.exposure);
 	     expabs = msg.exposure;
+	     changed=true;
      }
      if(msg.gain != gain && msg.gain != -1)
      {
 	     cam->set_control(9963795,msg.gain);
 	     gain = msg.gain;
+	     changed=true;
      }
      if(msg.saturation != saturation && msg.saturation  != -1)
      {
 	     cam->set_control(9963778,msg.saturation);
 	     saturation =  msg.saturation;
+	     changed=true;
      }
      if(msg.wbt != wbt && msg.wbt != -1)
      {
 	     cam->set_control(9963802,msg.wbt);
 	     wbt = msg.wbt;
+	     changed=true;
      }
      if(msg.focus != focus &&  msg.focus != -1)
      {
 	     cam->set_control(10094858,msg.focus);
 	     focus  = msg.focus;
+	     changed=true;
      }
      if(msg.focus_auto != focusauto && msg.focus_auto != -1)
      {
 	     cam->set_control(10094860,msg.focus_auto);
 	     focusauto = msg.focus_auto;
+	     changed=true;
      }
      if(msg.exposure_auto != expauto && msg.exposure_auto != -1)
      {
 	     cam->set_control(10094849,msg.exposure_auto);
 	     expauto = msg.exposure_auto;
+	     changed=true;
      }
-     ParameterPublish();
+     if (changed)
+             ParameterPublish();
   } 
 }
-;
 
