@@ -7,10 +7,14 @@
 #include "sensor_msgs/Image.h"
 #include "sensor_msgs/image_encodings.h"
 #include "sensor_msgs/CameraInfo.h"
+#include "std_msgs/Int32.h"
 #include "camera_info_manager/camera_info_manager.h"
 #include "image_transport/image_transport.h"
 
 #include "uvc_camera/camera.h"
+
+//Camera Sliders Message type
+#include <uvc_camera/camera_sliders.h>
 
 using namespace sensor_msgs;
 
@@ -109,7 +113,8 @@ namespace uvc_camera
     pub = it.advertise(output_topic.c_str(), 1);
     info_pub = node.advertise<CameraInfo>(info_topic.c_str(), 1);
 
-    // parameters settings subscribers
+    // parameters settings subscribers (Now merged into single subscriber
+/*
     brightness_sub = node.subscribe("brightness", 1000, &Camera::brightnessCallback, this);
     contrast_sub = node.subscribe("contrast", 1000, &Camera::contrastCallback, this);
     exposure_sub = node.subscribe("exposure", 1000, &Camera::exposureCallback, this);
@@ -124,18 +129,22 @@ namespace uvc_camera
     focus_sub = node.subscribe("focus", 1000, &Camera::focusCallback, this);
     backlight_sub = node.subscribe("backlight", 1000, &Camera::backlightCallback, this);
     pan_sub = node.subscribe("pan", 1000, &Camera::panCallback, this);
+*/
+    settings_sub = node.subscribe("sliders", 1000, &Camera::settingsCallback, this);
     tilt_sub = node.subscribe("tilt", 1000, &Camera::tiltCallback, this);
    
     // publish camera parameter info 
     bool latch = true;
-    brightness_pub = node.advertise<std_msgs::Int32>("brightness_info", 1, latch); // for UI
+    /*brightness_pub = node.advertise<std_msgs::Int32>("brightness_info", 1, latch); // for UI
     contrast_pub = node.advertise<std_msgs::Int32>("contrast_info", 1, latch); // for UI
     exposure_pub = node.advertise<std_msgs::Int32>("exposure_info", 1, latch); // for UI
     wbt_pub = node.advertise<std_msgs::Int32>("wbt_info", 1, latch); // for UI
     gain_pub = node.advertise<std_msgs::Int32>("gain_info", 1, latch); // for UI
     focus_pub = node.advertise<std_msgs::Int32>("focus_info", 1, latch); // for UI
+    */
+    settings_pub = node.advertise<uvc_camera::camera_sliders>("sliders_info", 10, latch);
     // tilt
-    tilt_pub = node.advertise<std_msgs::Int32>("tilt_info", 1, latch); // for UI
+    tilt_pub = node.advertise<std_msgs::Int32>("tilt_info", 10, latch); // for UI
 
 /* initialize the cameras */
     try
@@ -153,7 +162,7 @@ namespace uvc_camera
 
     /* do an initial (latch) publish of camera parameters so the are available to 
 	parameter subscribers */
-    initialParameterPublish();
+    ParameterPublish();
     
     /* and turn on the streamer */
     ok = true;
@@ -187,31 +196,31 @@ namespace uvc_camera
 
 
   void
-  Camera::initialParameterPublish()
+  Camera::ParameterPublish()
   {
     // the following parameters use std_msgs::Int32
-    std_msgs::Int32 msg0; 
-    std_msgs::Int32 msg1; 
-    std_msgs::Int32 msg2; 
+    uvc_camera::camera_sliders settingsmsg; 
+    std_msgs::Int32 tiltmsg; 
+    /*std_msgs::Int32 msg2; 
     std_msgs::Int32 msg3; 
     std_msgs::Int32 msg4; 
     std_msgs::Int32 msg5; 
     std_msgs::Int32 msg6; 
-    
-    msg0.data = brightness; 
-    brightness_pub.publish( msg0 );
-    msg1.data = contrast;; 
-    contrast_pub.publish( msg1 );
-    msg2.data = expabs;  
-    exposure_pub.publish( msg2 );
-    msg3.data = wbt;
-    wbt_pub.publish( msg3 );
-    msg4.data = focus; 
-    focus_pub.publish( msg4 );
-    msg5.data = gain; 
-    gain_pub.publish( msg5 );
-    msg6.data = tilt; 
-    tilt_pub.publish( msg6 );
+    */
+    settingsmsg.brightness = brightness; 
+    settingsmsg.contrast = contrast;
+    settingsmsg.exposure = expabs;  
+    settingsmsg.wbt = wbt;
+    settingsmsg.focus = focus; 
+    settingsmsg.gain = gain; 
+    settingsmsg.saturation = saturation;
+    settingsmsg.focus_auto = focusauto;
+    settingsmsg.exposure_auto = expauto;
+	  
+    tiltmsg.data = tilt;
+	  
+    settings_pub.publish(settingsmsg);
+    tilt_pub.publish(tiltmsg);
 
   }
 
@@ -282,7 +291,7 @@ namespace uvc_camera
     if (cam)
       delete cam;
   }
-  
+/* NO LONGER USED, MERGED INTO SINGLE MESSAGE  
   void Camera::brightnessCallback(const std_msgs::Int32::ConstPtr& msg)
   {
       if(msg->data >= 0 && msg->data <=255)
@@ -407,6 +416,14 @@ namespace uvc_camera
  	 focus_pub.publish( msg );
       }
    } 
+  void Camera::panCallback(const std_msgs::Int32::ConstPtr& msg)
+  {
+    if(msg->data >=-36000 && msg->data <=36000)
+      {
+         cam->set_control(10094856,msg->data);
+      }
+   }
+*/
   void Camera::tiltCallback(const std_msgs::Int32::ConstPtr& msg)
   {
     if(msg->data >= -36000 && msg->data <=36000)
@@ -416,14 +433,57 @@ namespace uvc_camera
  	 tilt = msg->data;
  	 tilt_pub.publish( msg );
       }
-  }  
-  void Camera::panCallback(const std_msgs::Int32::ConstPtr& msg)
+  }
+
+  void Camera::settingsCallback(const uvc_camera::camera_sliders& msg)
   {
-    if(msg->data >=-36000 && msg->data <=36000)
-      {
-         cam->set_control(10094856,msg->data);
-      }
-   }
+     if(msg.brightness != brightness)
+     {
+	     cam->set_control(9963776,msg.brightness);
+	     brightness = msg.brightness;
+     }
+     if(msg.contrast != contrast)
+     {
+	     cam->set_control(9963777,msg.contrast);
+	     contrast = msg.contrast;
+     }
+     if(msg.exposure != expabs)
+     {
+	     cam->set_control(10094850,msg.exposure);
+	     expabs = msg.exposure;
+     }
+     if(msg.gain != gain)
+     {
+	     cam->set_control(9963795,msg.gain);
+	     gain = msg.gain;
+     }
+     if(msg.saturation != saturation)
+     {
+	     cam->set_control(9963778,msg.saturation);
+	     saturation =  msg.saturation;
+     }
+     if(msg.wbt != wbt)
+     {
+	     cam->set_control(9963802,msg.wbt);
+	     wbt = msg.wbt;
+     }
+     if(msg.focus != focus)
+     {
+	     cam->set_control(10094858,msg.focus);
+	     focus  = msg.focus;
+     }
+     if(msg.focus_auto != focusauto)
+     {
+	     cam->set_control(10094860,msg.focus_auto);
+	     focusauto = msg.focus_auto;
+     }
+     if(msg.exposure_auto != expauto)
+     {
+	     cam->set_control(10094849,msg.exposure_auto);
+	     expauto = msg.exposure_auto;
+     }
+     ParameterPublish();
+  } 
 }
 ;
 

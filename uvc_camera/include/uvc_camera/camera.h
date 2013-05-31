@@ -5,6 +5,8 @@
 #include <boost/thread.hpp>
 #include <camera_info_manager/camera_info_manager.h>
 
+#include <uvc_camera/camera_sliders.h>
+
 namespace uvc_camera {
 
 class Camera {
@@ -12,9 +14,9 @@ class Camera {
     Camera(ros::NodeHandle comm_nh, ros::NodeHandle param_nh);
     void onInit();
     void sendInfo(sensor_msgs::ImagePtr &image, ros::Time time);
-    void initialParameterPublish();
+    void ParameterPublish();
     void feedImages();
-    void brightnessCallback(const std_msgs::Int32::ConstPtr& msg);
+    /*void brightnessCallback(const std_msgs::Int32::ConstPtr& msg);
     void contrastCallback(const std_msgs::Int32::ConstPtr& msg);
     void exposureCallback(const std_msgs::Int32::ConstPtr& msg);
     void exposureautoCallback(const std_msgs::Int32::ConstPtr& msg);
@@ -26,8 +28,9 @@ class Camera {
     void sharpnessCallback(const std_msgs::Int32::ConstPtr& msg);
     void saturationCallback(const std_msgs::Int32::ConstPtr& msg);  
     void focusautoCallback(const std_msgs::Int32::ConstPtr& msg);  
-    void focusCallback(const std_msgs::Int32::ConstPtr& msg);  
-    void panCallback(const std_msgs::Int32::ConstPtr& msg);  
+    void focusCallback(const std_msgs::Int32::ConstPtr& msg); 
+    */ 
+    void settingsCallback(const uvc_camera::camera_sliders& msg);  
     void tiltCallback(const std_msgs::Int32::ConstPtr& msg);  
   ~Camera();
   
@@ -46,7 +49,7 @@ class Camera {
     image_transport::Publisher pub;
     ros::Publisher info_pub;
     // subscribers for setting parameters
-    ros::Subscriber brightness_sub;
+    /*ros::Subscriber brightness_sub;
     ros::Subscriber contrast_sub;
     ros::Subscriber exposure_sub;
     ros::Subscriber exposureauto_sub;
@@ -58,18 +61,20 @@ class Camera {
     ros::Subscriber sharpness_sub;
     ros::Subscriber saturation_sub;  
     ros::Subscriber focusauto_sub;  
-    ros::Subscriber focus_sub;  
-    ros::Subscriber pan_sub;  
-    ros::Subscriber tilt_sub;  
+    ros::Subscriber focus_sub;
+    */
+    ros::Subscriber settings_sub;  
+    ros::Subscriber tilt_sub;
+    ros::Publisher settings_pub;
     // publisher of current parameters (in lieu CameraInfo.msg)
-    ros::Publisher brightness_pub; // for ui
+    /*ros::Publisher brightness_pub; // for ui
     ros::Publisher contrast_pub; // for ui
     ros::Publisher exposure_pub; // for ui
     ros::Publisher wbt_pub; // for ui
     ros::Publisher gain_pub; // for ui
     ros::Publisher focus_pub; // for ui
+    */
     ros::Publisher tilt_pub; // for ui
-
     uvc_cam::Cam *cam;
     boost::thread image_thread;
 };
