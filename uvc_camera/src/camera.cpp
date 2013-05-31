@@ -437,47 +437,47 @@ namespace uvc_camera
 
   void Camera::settingsCallback(const uvc_camera::camera_sliders& msg)
   {
-     if(msg.brightness != brightness)
+     if(msg.brightness != brightness && msg.brightness != -1)
      {
 	     cam->set_control(9963776,msg.brightness);
 	     brightness = msg.brightness;
      }
-     if(msg.contrast != contrast)
+     if(msg.contrast != contrast && msg.brightness != -1)
      {
 	     cam->set_control(9963777,msg.contrast);
 	     contrast = msg.contrast;
      }
-     if(msg.exposure != expabs)
+     if(msg.exposure != expabs && msg.exposure != -1)
      {
 	     cam->set_control(10094850,msg.exposure);
 	     expabs = msg.exposure;
      }
-     if(msg.gain != gain)
+     if(msg.gain != gain && msg.gain != -1)
      {
 	     cam->set_control(9963795,msg.gain);
 	     gain = msg.gain;
      }
-     if(msg.saturation != saturation)
+     if(msg.saturation != saturation && msg.saturation  != -1)
      {
 	     cam->set_control(9963778,msg.saturation);
 	     saturation =  msg.saturation;
      }
-     if(msg.wbt != wbt)
+     if(msg.wbt != wbt && msg.wbt != -1)
      {
 	     cam->set_control(9963802,msg.wbt);
 	     wbt = msg.wbt;
      }
-     if(msg.focus != focus)
+     if(msg.focus != focus &&  msg.focus != -1)
      {
 	     cam->set_control(10094858,msg.focus);
 	     focus  = msg.focus;
      }
-     if(msg.focus_auto != focusauto)
+     if(msg.focus_auto != focusauto && msg.focus_auto != -1)
      {
 	     cam->set_control(10094860,msg.focus_auto);
 	     focusauto = msg.focus_auto;
      }
-     if(msg.exposure_auto != expauto)
+     if(msg.exposure_auto != expauto && msg.exposure_auto != -1)
      {
 	     cam->set_control(10094849,msg.exposure_auto);
 	     expauto = msg.exposure_auto;
