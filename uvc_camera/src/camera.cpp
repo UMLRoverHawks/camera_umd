@@ -130,8 +130,8 @@ namespace uvc_camera
     backlight_sub = node.subscribe("backlight", 1000, &Camera::backlightCallback, this);
     pan_sub = node.subscribe("pan", 1000, &Camera::panCallback, this);
 */
-    settings_sub = node.subscribe("sliders", 1000, &Camera::settingsCallback, this);
-    tilt_sub = node.subscribe("tilt", 1000, &Camera::tiltCallback, this);
+    settings_sub = node.subscribe("sliders", 1, &Camera::settingsCallback, this);
+    tilt_sub = node.subscribe("tilt", 1, &Camera::tiltCallback, this);
    
     // publish camera parameter info 
     /*brightness_pub = node.advertise<std_msgs::Int32>("brightness_info", 1, latch); // for UI
@@ -141,9 +141,9 @@ namespace uvc_camera
     gain_pub = node.advertise<std_msgs::Int32>("gain_info", 1, latch); // for UI
     focus_pub = node.advertise<std_msgs::Int32>("focus_info", 1, latch); // for UI
     */
-    settings_pub = node.advertise<uvc_camera::camera_sliders>("sliders_info", 10, true);
+    settings_pub = node.advertise<uvc_camera::camera_sliders>("sliders_info", 1, true);
     // tilt
-    tilt_pub = node.advertise<std_msgs::Int32>("tilt_info", 10, true); // for UI
+    tilt_pub = node.advertise<std_msgs::Int32>("tilt_info", 1, true); // for UI
 
 /* initialize the cameras */
     try
