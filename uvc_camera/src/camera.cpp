@@ -141,9 +141,9 @@ namespace uvc_camera
     gain_pub = node.advertise<std_msgs::Int32>("gain_info", 1, latch); // for UI
     focus_pub = node.advertise<std_msgs::Int32>("focus_info", 1, latch); // for UI
     */
-    settings_pub = node.advertise<uvc_camera::camera_sliders>("sliders_info", 10, latch);
+    settings_pub = node.advertise<uvc_camera::camera_sliders>("sliders_info", 10, true);
     // tilt
-    tilt_pub = node.advertise<std_msgs::Int32>("tilt_info", 10, latch); // for UI
+    tilt_pub = node.advertise<std_msgs::Int32>("tilt_info", 10, true); // for UI
 
 /* initialize the cameras */
     try
