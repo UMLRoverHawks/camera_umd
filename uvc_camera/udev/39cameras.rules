@@ -1,6 +1,0 @@
-#KERNEL=="event?", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="0821", MODE="666"
-
-### WE HAVE PER-SERIAL SYMLINKS LIKE THESE!
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="0821", ATTRS{serial}=="0F449A00", SYMLINK+="camera0", MODE="666"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="0821", ATTRS{serial}=="74898A00", SYMLINK+="camera1", MODE="666"
-ATTRS{idVendor}=="046d", ATTRS{idProduct}=="0821", ATTRS{serial}=="32059A00", SYMLINK+="camera2", MODE="666"

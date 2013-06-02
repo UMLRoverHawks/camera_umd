@@ -505,6 +505,7 @@ namespace uvc_camera
      }
      if (changed)
              ParameterPublish();
+     else ROS_INFO("Received noop camera settings message");
   } 
 }
 

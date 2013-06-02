@@ -9,6 +9,6 @@
     <arg name="device" default="/dev/camera2" />
   </include>
   <include file="$(find uvc_camera)/launch/camera_node.launch" ns="camera3" >
-    <arg name="device" default="/dev/camera3" />    
+    <arg name="device" default="/dev/camera3" />
   </include>
 </launch>
