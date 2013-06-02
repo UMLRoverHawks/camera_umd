@@ -25,8 +25,8 @@
   <arg name="pan" default="0" />
   <arg name="tilt" default="0" />
   <arg name="expabs" default="166" />
-  <arg name="expauto" default="3" />
-  <arg name="expautop" default="1" />
+  <arg name="expauto" default="1" />
+  <arg name="expautop" default="0" />
   <node pkg="uvc_camera" type="camera_node" name="camera_node" output="screen">
     <param name="mode" value="$(arg mode)" />
     <param name="width" value="$(arg width)" />
