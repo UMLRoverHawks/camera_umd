@@ -141,9 +141,9 @@ namespace uvc_camera
     gain_pub = node.advertise<std_msgs::Int32>("gain_info", 1, latch); // for UI
     focus_pub = node.advertise<std_msgs::Int32>("focus_info", 1, latch); // for UI
     */
-    settings_pub = node.advertise<uvc_camera::camera_sliders>("sliders_info", 10, true);
+    settings_pub = node.advertise<uvc_camera::camera_sliders>("sliders_info", 1, true);
     // tilt
-    tilt_pub = node.advertise<std_msgs::Int32>("tilt_info", 10, true); // for UI
+    tilt_pub = node.advertise<std_msgs::Int32>("tilt_info", 1, true); // for UI
 
 /* initialize the cameras */
     try
@@ -166,6 +166,7 @@ namespace uvc_camera
     /* and turn on the streamer */
     ok = true;
     image_thread = boost::thread(boost::bind(&Camera::feedImages, this));
+    slider_spammer = boost::thread(boost::bind(&Camera::publishThread, this));
   }
 
   void
@@ -221,6 +222,16 @@ namespace uvc_camera
     settings_pub.publish(settingsmsg);
     tilt_pub.publish(tiltmsg);
 
+  }
+
+  void
+  Camera::publishThread()
+  {
+    while(ok)
+    {
+      sleep(3000);
+      ParameterPublish();
+    }
   }
 
 

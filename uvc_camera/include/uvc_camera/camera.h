@@ -15,6 +15,7 @@ class Camera {
     void onInit();
     void sendInfo(sensor_msgs::ImagePtr &image, ros::Time time);
     void ParameterPublish();
+    void publishThread();
     void feedImages();
     /*void brightnessCallback(const std_msgs::Int32::ConstPtr& msg);
     void contrastCallback(const std_msgs::Int32::ConstPtr& msg);
@@ -76,7 +77,7 @@ class Camera {
     */
     ros::Publisher tilt_pub; // for ui
     uvc_cam::Cam *cam;
-    boost::thread image_thread;
+    boost::thread image_thread, slider_spammer;
 };
 
 };
