@@ -1,9 +1,9 @@
 <launch>
   <arg name="mode" default="MJPG" />
-  <arg name="width" default="864" />
-  <arg name="height" default="480" />
-  <!--arg name="width" default="1184" /-->
-  <!--arg name="height" default="656" /-->
+  <arg name="width" default="320" />
+  <arg name="height" default="176" />
+  <!--arg name="width" default="864" /-->
+  <!--arg name="height" default="480" /-->
   <arg name="fps" default="30" />
   <arg name="frame" default="camera_frame" />
   <arg name="device" default="/dev/video0" />
