@@ -13,20 +13,19 @@
   <arg name="brightness" default="128" />
   <arg name="contrast" default="33" />
   <arg name="wbtauto" default="0" />
-  <arg name="wbt" default="5315" />
+  <arg name="wbt" default="5900" />
   <arg name="plf" default="2" />
   <arg name="gain" default="64" />
   <arg name="sharpness" default="72" />
   <arg name="backlight" default="0" />
   <arg name="focusauto" default="0" />
   <arg name="focus" default="16" />
-  <arg name="saturation" default="32" />
-  <!--arg name="saturation" default="40" /-->
+  <arg name="saturation" default="38" />
   <arg name="pan" default="0" />
   <arg name="tilt" default="0" />
-  <arg name="expabs" default="166" />
-  <arg name="expauto" default="1" />
-  <arg name="expautop" default="0" />
+  <arg name="expabs" default="5" />
+  <arg name="expauto" default="3" />
+  <arg name="expautop" default="1" />
   <node pkg="uvc_camera" type="camera_node" name="camera_node" output="screen">
     <param name="mode" value="$(arg mode)" />
     <param name="width" value="$(arg width)" />
