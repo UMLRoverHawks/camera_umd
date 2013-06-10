@@ -222,7 +222,7 @@ namespace uvc_camera
     settings_pub.publish(settingsmsg);
     tilt_pub.publish(tiltmsg);
     
-    ROS_INFO("SENDING CAM PARAMS");
+    //ROS_INFO("SENDING CAM PARAMS");
   }
 
   void
