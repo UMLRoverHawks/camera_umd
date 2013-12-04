@@ -24,13 +24,13 @@ std::runtime_error up(std::string message)
 	return std::runtime_error(awwcrap.str().c_str());
 }
 
-Cam::Cam(const char *_device, mode_t _mode, int _width, int _height, int _fps, int _brightness, int _contrast, int _wbt, int _wbtauto, int _plf, int _gain, int _sharpness, int _backlight, int _focusauto, int _focus, int _saturation, int _pan, int _tilt, int _expabs, int _expauto, int _expautop)
+Cam::Cam(const char *_device, mode_t _mode, int _width, int _height, int _fps, int _brightness, int _contrast, int _wbt, int _wbtauto, int _plf, int _gain, int _sharpness, int _backlight, int _focusauto, int _focus, int _saturation, int _pan, int _tilt, int _zoom, int _expabs, int _expauto, int _expautop)
 : mode(_mode), device(_device),
   motion_threshold_luminance(100), motion_threshold_count(-1),
   width(_width), height(_height), fps(_fps), rgb_frame(NULL),
-  brightness(_brightness), contrast(_contrast), wbt(_wbt), wbtauto(_wbtauto), plf(_plf), gain(_gain), sharpness(_sharpness), backlight(_backlight), focusauto(_focusauto), focus(_focus), saturation(_saturation), pan(_pan), tilt(_tilt), expabs(_expabs), expauto(_expauto), expautop(_expautop)
+  brightness(_brightness), contrast(_contrast), wbt(_wbt), wbtauto(_wbtauto), plf(_plf), gain(_gain), sharpness(_sharpness), backlight(_backlight), focusauto(_focusauto), focus(_focus), saturation(_saturation), pan(_pan), tilt(_tilt), zoom(_zoom), expabs(_expabs), expauto(_expauto), expautop(_expautop)
 {
-  printf("opening %s\n", _device);
+  ROS_INFO("opening %s", _device);
   if ((fd = open(_device, O_RDWR)) == -1)
     throw std::runtime_error("couldn't open " + device);
   memset(&fmt, 0, sizeof(v4l2_format));
@@ -49,7 +49,7 @@ Cam::Cam(const char *_device, mode_t _mode, int _width, int _height, int _fps, i
   int ret;
   while ((ret = ioctl(fd, VIDIOC_ENUM_FMT, &f)) == 0)
   {
-    printf("pixfmt %d = '%4s' desc = '%s'\n",
+    ROS_INFO("pixfmt %d = '%4s' desc = '%s'",
            f.index++, (char *)&f.pixelformat, f.description);
     // enumerate frame sizes
     v4l2_frmsizeenum fsize;
@@ -60,7 +60,7 @@ Cam::Cam(const char *_device, mode_t _mode, int _width, int _height, int _fps, i
       fsize.index++;
       if (fsize.type == V4L2_FRMSIZE_TYPE_DISCRETE)
       {
-        printf("  discrete: %ux%u:   ",
+        ROS_INFO("  discrete: %ux%u:   ",
                fsize.discrete.width, fsize.discrete.height);
         // enumerate frame rates
         v4l2_frmivalenum fival;
@@ -73,30 +73,29 @@ Cam::Cam(const char *_device, mode_t _mode, int _width, int _height, int _fps, i
           fival.index++;
           if (fival.type == V4L2_FRMIVAL_TYPE_DISCRETE)
           {
-            printf("%u/%u ",
+            ROS_INFO("%u/%u ",
                    fival.discrete.numerator, fival.discrete.denominator);
+          } else {
+            ROS_INFO("I only handle discrete frame intervals...");
           }
-          else
-            printf("I only handle discrete frame intervals...\n");
         }
-        printf("\n");
       }
       else if (fsize.type == V4L2_FRMSIZE_TYPE_CONTINUOUS)
       {
-        printf("  continuous: %ux%u to %ux%u\n",
+        ROS_INFO("  continuous: %ux%u to %ux%u",
                fsize.stepwise.min_width, fsize.stepwise.min_height,
                fsize.stepwise.max_width, fsize.stepwise.max_height);
       }
       else if (fsize.type == V4L2_FRMSIZE_TYPE_STEPWISE)
       {
-        printf("  stepwise: %ux%u to %ux%u step %ux%u\n",
+        ROS_INFO("  stepwise: %ux%u to %ux%u step %ux%u",
                fsize.stepwise.min_width,  fsize.stepwise.min_height,
                fsize.stepwise.max_width,  fsize.stepwise.max_height,
                fsize.stepwise.step_width, fsize.stepwise.step_height);
       }
       else
       {
-        printf("  fsize.type not supported: %d\n", fsize.type);
+        ROS_INFO("  fsize.type not supported: %d", fsize.type);
       }
     }
   }
@@ -137,7 +136,7 @@ Cam::Cam(const char *_device, mode_t _mode, int _width, int _height, int _fps, i
         ctrl_type = "button";
       else if (queryctrl.type == V4L2_CTRL_TYPE_MENU)
         ctrl_type = "menu";
-      printf("  %s (%s, %d, id = %x): %d to %d (%d)\n",
+      ROS_INFO("  %s (%s, %d, id = %x): %d to %d (%d)",
              ctrl_type,
              queryctrl.name, queryctrl.flags, queryctrl.id,
              queryctrl.minimum, queryctrl.maximum, queryctrl.step);
@@ -149,7 +148,7 @@ Cam::Cam(const char *_device, mode_t _mode, int _width, int _height, int _fps, i
         querymenu.index = 0;
         while (ioctl(fd, VIDIOC_QUERYMENU, &querymenu) == 0)
         {
-          printf("    %d: %s\n", querymenu.index, querymenu.name);
+          ROS_INFO("    %d: %s", querymenu.index, querymenu.name);
           querymenu.index++;
         }
       }
@@ -166,41 +165,36 @@ Cam::Cam(const char *_device, mode_t _mode, int _width, int _height, int _fps, i
       i = V4L2_CID_BASE_EXTCTR;
   }
 
-  try
-  {
-    // the commented labels correspond to controls not available for this camera
-    //set_control(V4L2_CID_EXPOSURE_AUTO_NEW, 2);
-    set_control(10094851, 1); // Exposure, Auto Priority
-    set_control(10094849, 1); // Exposure, Auto
-    //set_control(168062321, 0); //Disable video processing
-    //set_control(0x9a9010, 100);
-    //set_control(V4L2_CID_EXPOSURE_ABSOLUTE_NEW, 300);
-    //set_control(V4L2_CID_BRIGHTNESS, 140);
-    //set_control(V4L2_CID_CONTRAST, 40);
-    //set_control(V4L2_CID_WHITE_BALANCE_TEMP_AUTO_OLD, 0);
-    set_control(9963776, brightness); //Brightness
-    set_control(9963777, contrast); //Contrast
-    set_control(9963788, wbtauto); // White Balance Temperature, Auto
-    if(wbtauto == 0)    
-	set_control(9963802, wbt); // White Balance Temperature THIS ONLY WORKS IF WBT, Auto is set to 0
-    set_control(9963800, plf);  // power line frequency to 60 hz
-    set_control(9963795, gain); // Gain
-    set_control(9963803, sharpness); // Sharpness
-    set_control(9963804, backlight); //Backlight Compensation
-    set_control(10094850, expabs); // Exposure (Absolute)
-    set_control(10094860, focusauto);//Focus, Auto
-    if(focusauto == 0)
-    	set_control(10094858, focus); //Focus (absolute) THIS ONLY WORKS IF Focus, Auto is set to 0
-    //set_control(168062213, 3); //LED1 Mode
-    //set_control(168062214, 0); //LED1 Frequency
-    set_control(9963778, saturation); // Saturation
-    set_control(10094856, pan);//Pan (Absolute)
-    set_control(10094857, tilt);//Tilt (Absolute)
-  }
-  catch (std::runtime_error &ex)
-  {
-    printf("ERROR: could not set some settings.  \n %s \n", ex.what());
-  }
+  ROS_INFO("configure VIDIOC control settings...");
+  // NOTE: the commented labels correspond to controls not available for this camera
+  //set_control(168062213, 3); //LED1 Mode
+  //set_control(168062214, 0); //LED1 Frequency
+  //set_control(168062321, 0); //Disable video processing
+  //set_control(0x9a9010, 100);
+  //set_control(V4L2_CID_EXPOSURE_ABSOLUTE_NEW, 300);
+  //set_control(V4L2_CID_BRIGHTNESS, 140);
+  //set_control(V4L2_CID_CONTRAST, 40);
+  //set_control(V4L2_CID_WHITE_BALANCE_TEMP_AUTO_OLD, 0);
+  //set_control(V4L2_CID_EXPOSURE_AUTO_NEW, 2);
+  set_control(10094851, expautop);  //Exposure, Auto Priority
+  set_control(10094849, expauto); //Exposure, Auto
+  set_control(10094850, expabs);  //Exposure (Absolute)
+  set_control(9963776, brightness); //Brightness
+  set_control(9963777, contrast); //Contrast
+  set_control(9963778, saturation); //Saturation
+  set_control(9963795, gain); //Gain
+  set_control(9963803, sharpness);  //Sharpness
+  set_control(9963804, backlight);  //Backlight Compensation
+  set_control(9963788, wbtauto);  //White Balance Temperature, Auto
+  if(wbtauto == 0)    
+	  set_control(9963802, wbt);  //White Balance Temperature // THIS ONLY WORKS IF WBT, Auto is set to 0
+  set_control(10094860, focusauto); //Focus, Auto
+  if(focusauto == 0)
+  	set_control(10094858, focus); //Focus (absolute)  // THIS ONLY WORKS IF Focus, Auto is set to 0
+  set_control(10094856, pan); //Pan (Absolute)
+  set_control(10094857, tilt);  //Tilt (Absolute)
+  set_control(10094861, zoom);  //Zoom, Absolute
+  set_control(9963800, plf);  //Power Line Frequency  // 2 = 60 hz
 
 /*
   v4l2_jpegcompression v4l2_jpeg;
@@ -461,23 +455,57 @@ void Cam::release(unsigned buf_idx)
 
 void Cam::set_control(uint32_t id, int val)
 {
-  v4l2_control c;
-  c.id = id;
+  int old_c_val;
+  std::string id_name;
+  v4l2_control c; // see http://lxr.free-electrons.com/source/include/uapi/linux/videodev2.h#L1218
+  v4l2_queryctrl queryctrl; // see http://lxr.free-electrons.com/source/include/uapi/linux/videodev2.h#L1259
 
-  if (ioctl(fd, VIDIOC_G_CTRL, &c) == 0)
+  // check if this is a valid control and get name
+  memset(&queryctrl, 0, sizeof(queryctrl));
+  queryctrl.id = id;
+  if (ioctl(fd, VIDIOC_QUERYCTRL, &queryctrl) == 0 &&
+      !(queryctrl.flags & V4L2_CTRL_FLAG_DISABLED))
   {
-	ROS_INFO("Trying to change %d from %d to %d",id,c.value,val);
+    id_name = std::string((const char *) queryctrl.name);
+  } else {
+    ROS_WARN("Invalid VIDIOC control -- %x", id);
+    return;
+  }
+
+  try 
+  {
+    // get the current value
+    c.id = id;
+    if (ioctl(fd, VIDIOC_G_CTRL, &c) == 0)
+    {
+      old_c_val = c.value;
+	    ROS_INFO("Trying to change %d (%s) from %d to %d", id, id_name.c_str(), c.value, val);
+
+      if (c.value != val)
+      {
+        c.value = val;
+        // set the updated value
+        if (ioctl(fd, VIDIOC_S_CTRL, &c) < 0)
+        {
+          ROS_INFO("*** FAILED to change %x (%s) from %d to %d ***", id, id_name.c_str(), old_c_val, val);
+          throw std::runtime_error("unable to set");
+        } else {
+          ROS_INFO("  *** Successfully changed %x (%s) from %d to %d ***", id, id_name.c_str(), old_c_val, val);
+        }
+      } else {
+        ROS_INFO("  SKIP: %x (%s) is already set to %d", id, id_name.c_str(), val);
+      }
+    } else {
+      ROS_INFO("*** FAILED to get %x (%s) ***", id, id_name.c_str());
+      throw std::runtime_error("unable to get");
+    }
+  } catch (std::runtime_error &e) {
+    ROS_INFO("Control %x (%s) not set! -- %s",  id, id_name.c_str(), e.what());
+  }
 	/*
 	perror("unable to get control");
 	throw std::runtime_error("unable to get control");
 	*/
-  }
-  c.value = val;
-  if (ioctl(fd, VIDIOC_S_CTRL, &c) < 0)
-  {
-        ROS_INFO("Control not set!");
-	//throw up("unable to set control");
-  }
 }
 
 void Cam::set_motion_thresholds(int lum, int count)

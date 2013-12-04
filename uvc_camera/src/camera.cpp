@@ -48,6 +48,7 @@ namespace uvc_camera
     saturation = 32;
     pan = 0;
     tilt = 0;
+    zoom = 1;
     expabs = 166;
     expauto = 3;
     expautop = 1;
@@ -83,6 +84,7 @@ namespace uvc_camera
     pnode.getParam("saturation", saturation);
     pnode.getParam("pan", pan);
     pnode.getParam("tilt", tilt);
+    pnode.getParam("zoom", zoom);
     pnode.getParam("expabs", expabs);
     pnode.getParam("expauto", expauto);
     pnode.getParam("expautop", expautop);
@@ -148,7 +150,7 @@ namespace uvc_camera
 /* initialize the cameras */
     try
     {
-      cam = new uvc_cam::Cam(device.c_str(), mode, width, height, fps, brightness, contrast, wbt, wbtauto, plf, gain, sharpness, backlight, focusauto, focus, saturation, pan, tilt, expabs, expauto, expautop);
+      cam = new uvc_cam::Cam(device.c_str(), mode, width, height, fps, brightness, contrast, wbt, wbtauto, plf, gain, sharpness, backlight, focusauto, focus, saturation, pan, tilt, zoom, expabs, expauto, expautop);
       cam->set_motion_thresholds(100, -1);
     }
     catch (std::exception &e)
